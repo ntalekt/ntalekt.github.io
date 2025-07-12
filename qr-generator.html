@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .controls-panel {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .preview-panel {
+            text-align: center;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .color-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .color-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-group input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .size-control {
+            margin-bottom: 15px;
+        }
+
+        .size-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .size-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* 6x2 Grid Layout */
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            background: white;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #6c757d;
+            min-height: 80px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-color: #667eea;
+            background: #f8f9ff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .tab-text {
+            font-size: 12px;
+            line-height: 1.2;
+            font-weight: 600;
+        }
+
+        /* Social Media Logo Styles */
+        .instagram-logo {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            border-radius: 6px;
+            position: relative;
+            margin-bottom: 6px;
+        }
+
+        .instagram-logo::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .instagram-logo::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .facebook-logo {
+            width: 24px;
+            height: 24px;
+            background: #1877f2;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .twitter-logo {
+            width: 24px;
+            height: 24px;
+            background: #000000;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .youtube-logo {
+            width: 24px;
+            height: 24px;
+            background: #ff0000;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .tiktok-logo {
+            width: 24px;
+            height: 24px;
+            background: #000000;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-prefix {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .input-prefix span {
+            background: #e9ecef;
+            padding: 12px;
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .input-prefix input {
+            border: none;
+            flex: 1;
+            margin: 0;
+        }
+
+        .input-prefix input:focus {
+            box-shadow: none;
+        }
+
+        .input-prefix:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .vcard-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .vcard-fields .form-group {
+            margin-bottom: 10px;
+        }
+
+        .wifi-fields,
+        .email-fields,
+        .sms-fields,
+        .instagram-fields,
+        .bitcoin-fields,
+        .facebook-fields,
+        .twitter-fields,
+        .youtube-fields,
+        .tiktok-fields {
+            display: grid;
+            gap: 10px;
+        }
+
+        .qr-preview {
+            margin-bottom: 20px;
+        }
+
+        #qr-canvas {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .download-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .download-btn.png {
+            background: #28a745;
+            color: white;
+        }
+
+        .download-btn.svg {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .download-btn.pdf {
+            background: #dc3545;
+            color: white;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header p {
+                font-size: 1em;
+            }
+
+            .color-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .download-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .vcard-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+                gap: 6px;
+                padding: 8px;
+            }
+
+            .tab {
+                padding: 8px 4px;
+                min-height: 70px;
+            }
+
+            .tab-icon {
+                font-size: 20px;
+                margin-bottom: 4px;
+            }
+
+            .tab-text {
+                font-size: 10px;
+            }
+
+            .instagram-logo,
+            .facebook-logo,
+            .twitter-logo,
+            .youtube-logo,
+            .tiktok-logo {
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+
+            .instagram-logo::before {
+                width: 8px;
+                height: 8px;
+                border-width: 1px;
+            }
+
+            .instagram-logo::after {
+                width: 2px;
+                height: 2px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .controls-panel,
+            .preview-panel {
+                padding: 15px;
+            }
+
+            .tabs {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(6, 1fr);
+                gap: 4px;
+                padding: 6px;
+            }
+
+            .tab {
+                padding: 6px 2px;
+                min-height: 60px;
+            }
+
+            .tab-icon {
+                font-size: 18px;
+                margin-bottom: 3px;
+            }
+
+            .tab-text {
+                font-size: 9px;
+            }
+
+            .instagram-logo,
+            .facebook-logo,
+            .twitter-logo,
+            .youtube-logo,
+            .tiktok-logo {
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
+                margin-bottom: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>QR Code Generator Pro</h1>
+            <p>Create professional QR codes with advanced customization options</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <!-- QR Code Type Selection -->
+                <div class="section">
+                    <h3>QR Code Type</h3>
+                    <div class="tabs">
+                        <!-- Top Row (6 items) -->
+                        <button class="tab active" data-tab="url">
+                            <span class="tab-icon">🔗</span>
+                            <span class="tab-text">URL</span>
+                        </button>
+                        <button class="tab" data-tab="wifi">
+                            <span class="tab-icon">📶</span>
+                            <span class="tab-text">WiFi</span>
+                        </button>
+                        <button class="tab" data-tab="contact">
+                            <span class="tab-icon">👤</span>
+                            <span class="tab-text">Contact</span>
+                        </button>
+                        <button class="tab" data-tab="text">
+                            <span class="tab-icon">📝</span>
+                            <span class="tab-text">Text</span>
+                        </button>
+                        <button class="tab" data-tab="email">
+                            <span class="tab-icon">✉️</span>
+                            <span class="tab-text">Email</span>
+                        </button>
+                        <button class="tab" data-tab="sms">
+                            <span class="tab-icon">💬</span>
+                            <span class="tab-text">SMS</span>
+                        </button>
+                        
+                        <!-- Bottom Row (6 items) -->
+                        <button class="tab" data-tab="instagram">
+                            <div class="instagram-logo"></div>
+                            <span class="tab-text">Instagram</span>
+                        </button>
+                        <button class="tab" data-tab="youtube">
+                            <div class="youtube-logo">▶</div>
+                            <span class="tab-text">YouTube</span>
+                        </button>
+                        <button class="tab" data-tab="facebook">
+                            <div class="facebook-logo">f</div>
+                            <span class="tab-text">Facebook</span>
+                        </button>
+                        <button class="tab" data-tab="tiktok">
+                            <div class="tiktok-logo">♪</div>
+                            <span class="tab-text">TikTok</span>
+                        </button>
+                        <button class="tab" data-tab="twitter">
+                            <div class="twitter-logo">𝕏</div>
+                            <span class="tab-text">Twitter</span>
+                        </button>
+                        <button class="tab" data-tab="bitcoin">
+                            <span class="tab-icon">₿</span>
+                            <span class="tab-text">Bitcoin</span>
+                        </button>
+                    </div>
+
+                    <!-- URL Tab -->
+                    <div class="tab-content active" id="url-tab">
+                        <div class="form-group">
+                            <label for="url-input">Website URL</label>
+                            <input type="url" id="url-input" placeholder="https://example.com" value="https://example.com">
+                        </div>
+                    </div>
+
+                    <!-- WiFi Tab -->
+                    <div class="tab-content" id="wifi-tab">
+                        <div class="wifi-fields">
+                            <div class="form-group">
+                                <label for="wifi-ssid">Network Name (SSID)</label>
+                                <input type="text" id="wifi-ssid" placeholder="MyWiFiNetwork" value="MyWiFiNetwork">
+                            </div>
+                            <div class="form-group">
+                                <label for="wifi-password">Password</label>
+                                <input type="password" id="wifi-password" placeholder="Password123" value="Password123">
+                            </div>
+                            <div class="form-group">
+                                <label for="wifi-security">Security Type</label>
+                                <select id="wifi-security">
+                                    <option value="WPA" selected>WPA/WPA2</option>
+                                    <option value="WEP">WEP</option>
+                                    <option value="nopass">None</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="wifi-hidden"> Hidden Network
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Tab -->
+                    <div class="tab-content" id="contact-tab">
+                        <div class="vcard-fields">
+                            <div class="form-group">
+                                <label for="contact-name">Full Name</label>
+                                <input type="text" id="contact-name" placeholder="John Doe" value="John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-org">Organization</label>
+                                <input type="text" id="contact-org" placeholder="Company Name" value="Acme Corporation">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-phone">Phone</label>
+                                <input type="tel" id="contact-phone" placeholder="+1234567890" value="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">Email</label>
+                                <input type="email" id="contact-email" placeholder="john@example.com" value="john@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-url">Website</label>
+                                <input type="url" id="contact-url" placeholder="https://example.com" value="https://example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-address">Address</label>
+                                <input type="text" id="contact-address" placeholder="123 Main St, City, State" value="123 Main St, New York, NY 10001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Tab -->
+                    <div class="tab-content" id="text-tab">
+                        <div class="form-group">
+                            <label for="text-input">Text Content</label>
+                            <textarea id="text-input" placeholder="Enter your text here...">Hello, World!</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Email Tab -->
+                    <div class="tab-content" id="email-tab">
+                        <div class="email-fields">
+                            <div class="form-group">
+                                <label for="email-to">Recipient Email</label>
+                                <input type="email" id="email-to" placeholder="recipient@example.com" value="contact@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="email-subject">Subject</label>
+                                <input type="text" id="email-subject" placeholder="Email subject" value="Hello from QR Code">
+                            </div>
+                            <div class="form-group">
+                                <label for="email-body">Message</label>
+                                <textarea id="email-body" placeholder="Email message body...">Hi! I'm contacting you through a QR code. How convenient!</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SMS Tab -->
+                    <div class="tab-content" id="sms-tab">
+                        <div class="sms-fields">
+                            <div class="form-group">
+                                <label for="sms-phone">Phone Number</label>
+                                <input type="tel" id="sms-phone" placeholder="+1234567890" value="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="sms-message">Message</label>
+                                <textarea id="sms-message" placeholder="SMS message text...">Hello! This message was sent via QR code.</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instagram Tab -->
+                    <div class="tab-content" id="instagram-tab">
+                        <div class="instagram-fields">
+                            <div class="form-group">
+                                <label for="instagram-username">Instagram Username</label>
+                                <div class="input-prefix">
+                                    <span>@</span>
+                                    <input type="text" id="instagram-username" placeholder="username" value="example_user">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Tab -->
+                    <div class="tab-content" id="youtube-tab">
+                        <div class="youtube-fields">
+                            <div class="form-group">
+                                <label for="youtube-input">YouTube Channel or Video</label>
+                                <select id="youtube-type" style="margin-bottom: 10px;">
+                                    <option value="channel">Channel</option>
+                                    <option value="video">Video</option>
+                                </select>
+                                <div class="input-prefix" id="youtube-channel-input">
+                                    <span>youtube.com/</span>
+                                    <input type="text" id="youtube-channel" placeholder="@username or /c/channelname" value="@example">
+                                </div>
+                                <input type="url" id="youtube-video" placeholder="https://youtube.com/watch?v=..." value="https://youtube.com/watch?v=dQw4w9WgXcQ" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facebook Tab -->
+                    <div class="tab-content" id="facebook-tab">
+                        <div class="facebook-fields">
+                            <div class="form-group">
+                                <label for="facebook-username">Facebook Username/Page</label>
+                                <div class="input-prefix">
+                                    <span>facebook.com/</span>
+                                    <input type="text" id="facebook-username" placeholder="username" value="example.user">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TikTok Tab -->
+                    <div class="tab-content" id="tiktok-tab">
+                        <div class="tiktok-fields">
+                            <div class="form-group">
+                                <label for="tiktok-username">TikTok Username</label>
+                                <div class="input-prefix">
+                                    <span>@</span>
+                                    <input type="text" id="tiktok-username" placeholder="username" value="example_user">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Twitter Tab -->
+                    <div class="tab-content" id="twitter-tab">
+                        <div class="twitter-fields">
+                            <div class="form-group">
+                                <label for="twitter-username">Twitter Username</label>
+                                <div class="input-prefix">
+                                    <span>@</span>
+                                    <input type="text" id="twitter-username" placeholder="username" value="example_user">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bitcoin Tab -->
+                    <div class="tab-content" id="bitcoin-tab">
+                        <div class="bitcoin-fields">
+                            <div class="form-group">
+                                <label for="bitcoin-address">Bitcoin Address</label>
+                                <input type="text" id="bitcoin-address" placeholder="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" value="1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa">
+                            </div>
+                            <div class="form-group">
+                                <label for="bitcoin-amount">Amount (BTC) - Optional</label>
+                                <input type="number" id="bitcoin-amount" placeholder="0.001" step="0.00000001" value="0.001">
+                            </div>
+                            <div class="form-group">
+                                <label for="bitcoin-label">Label/Description - Optional</label>
+                                <input type="text" id="bitcoin-label" placeholder="Payment for services" value="Payment for services">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customization Controls -->
+				<details class="section" id="customization-section">
+					<summary>
+						<h3 style="display:inline">Customization</h3>
+					</summary>
+
+					<!-- original Customization content -->
+					<div class="color-controls">
+						<div class="color-group">
+							<label for="fg-color">Foreground:</label>
+							<input type="color" id="fg-color" value="#000000">
+						</div>
+						<div class="color-group">
+							<label for="bg-color">Background:</label>
+							<input type="color" id="bg-color" value="#ffffff">
+						</div>
+					</div>
+
+					<div class="size-control">
+						<label for="size-slider">Size: <span id="size-value">256</span>px</label>
+						<input type="range" id="size-slider" class="size-slider" min="128" max="512" value="256">
+					</div>
+
+					<div class="form-group">
+						<label for="error-level">Error Correction Level</label>
+						<select id="error-level">
+							<option value="L">Low (~7%)</option>
+							<option value="M" selected>Medium (~15%)</option>
+							<option value="Q">Quartile (~25%)</option>
+							<option value="H">High (~30%)</option>
+						</select>
+					</div>
+				</details>
+            </div>
+
+            <div class="preview-panel">
+                <div class="qr-preview">
+                    <canvas id="qr-canvas"></canvas>
+                </div>
+                
+                <div class="download-buttons">
+                    <button class="download-btn png" onclick="downloadQR('png')">PNG</button>
+                    <button class="download-btn svg" onclick="downloadQR('svg')">SVG</button>
+                    <button class="download-btn pdf" onclick="downloadQR('pdf')">PDF</button>
+                </div>
+
+                <div class="error-message" id="error-message"></div>
+                <div class="success-message" id="success-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentQRData = '';
+        let currentQROptions = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            generateQR();
+        });
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+
+            // Input event listeners
+            document.getElementById('url-input').addEventListener('input', generateQR);
+            document.getElementById('text-input').addEventListener('input', generateQR);
+            
+            // Email form listeners
+            ['email-to', 'email-subject', 'email-body'].forEach(id => {
+                document.getElementById(id).addEventListener('input', generateQR);
+            });
+
+            // SMS form listeners
+            ['sms-phone', 'sms-message'].forEach(id => {
+                document.getElementById(id).addEventListener('input', generateQR);
+            });
+
+            // Contact form listeners
+            ['contact-name', 'contact-org', 'contact-phone', 'contact-email', 'contact-url', 'contact-address'].forEach(id => {
+                document.getElementById(id).addEventListener('input', generateQR);
+            });
+
+            // WiFi form listeners
+            ['wifi-ssid', 'wifi-password', 'wifi-security'].forEach(id => {
+                document.getElementById(id).addEventListener('input', generateQR);
+            });
+            document.getElementById('wifi-hidden').addEventListener('change', generateQR);
+
+            // Bitcoin form listeners
+            ['bitcoin-address', 'bitcoin-amount', 'bitcoin-label'].forEach(id => {
+                document.getElementById(id).addEventListener('input', generateQR);
+            });
+
+            // Social media form listeners
+            document.getElementById('instagram-username').addEventListener('input', generateQR);
+            document.getElementById('facebook-username').addEventListener('input', generateQR);
+            document.getElementById('twitter-username').addEventListener('input', generateQR);
+            document.getElementById('youtube-channel').addEventListener('input', generateQR);
+            document.getElementById('youtube-video').addEventListener('input', generateQR);
+            document.getElementById('tiktok-username').addEventListener('input', generateQR);
+
+            // YouTube type selector
+            document.getElementById('youtube-type').addEventListener('change', function() {
+                const channelInput = document.getElementById('youtube-channel-input');
+                const videoInput = document.getElementById('youtube-video');
+                
+                if (this.value === 'video') {
+                    channelInput.style.display = 'none';
+                    videoInput.style.display = 'block';
+                } else {
+                    channelInput.style.display = 'flex';
+                    videoInput.style.display = 'none';
+                }
+                generateQR();
+            });
+
+            // Customization listeners
+            document.getElementById('fg-color').addEventListener('input', generateQR);
+            document.getElementById('bg-color').addEventListener('input', generateQR);
+            document.getElementById('size-slider').addEventListener('input', function() {
+                document.getElementById('size-value').textContent = this.value;
+                generateQR();
+            });
+            document.getElementById('error-level').addEventListener('change', generateQR);
+        }
+
+        function switchTab(tabName) {
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update active content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            generateQR();
+        }
+
+        function getActiveTabData() {
+            const activeTab = document.querySelector('.tab.active').dataset.tab;
+            
+            switch(activeTab) {
+                case 'url':
+                    return document.getElementById('url-input').value;
+                
+                case 'text':
+                    return document.getElementById('text-input').value;
+                
+                case 'email':
+                    return generateEmailString();
+                
+                case 'sms':
+                    return generateSMSString();
+                
+                case 'contact':
+                    return generateVCard();
+                
+                case 'wifi':
+                    return generateWiFiString();
+                
+                case 'bitcoin':
+                    return generateBitcoinString();
+                
+                case 'instagram':
+                    return generateInstagramString();
+                
+                case 'facebook':
+                    return generateFacebookString();
+                
+                case 'twitter':
+                    return generateTwitterString();
+                
+                case 'youtube':
+                    return generateYouTubeString();
+                
+                case 'tiktok':
+                    return generateTikTokString();
+                
+                default:
+                    return '';
+            }
+        }
+
+        function generateEmailString() {
+            const to = document.getElementById('email-to').value;
+            const subject = document.getElementById('email-subject').value;
+            const body = document.getElementById('email-body').value;
+
+            if (!to) return '';
+
+            let emailString = `mailto:${to}`;
+            const params = [];
+            
+            if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
+            if (body) params.push(`body=${encodeURIComponent(body)}`);
+            
+            if (params.length > 0) {
+                emailString += '?' + params.join('&');
+            }
+
+            return emailString;
+        }
+
+        function generateSMSString() {
+            const phone = document.getElementById('sms-phone').value;
+            const message = document.getElementById('sms-message').value;
+
+            if (!phone) return '';
+
+            let smsString = `sms:${phone}`;
+            if (message) {
+                smsString += `?body=${encodeURIComponent(message)}`;
+            }
+
+            return smsString;
+        }
+
+        function generateVCard() {
+            const name = document.getElementById('contact-name').value;
+            const org = document.getElementById('contact-org').value;
+            const phone = document.getElementById('contact-phone').value;
+            const email = document.getElementById('contact-email').value;
+            const url = document.getElementById('contact-url').value;
+            const address = document.getElementById('contact-address').value;
+
+            let vcard = 'BEGIN:VCARD\nVERSION:3.0\n';
+            if (name) vcard += `FN:${name}\n`;
+            if (org) vcard += `ORG:${org}\n`;
+            if (phone) vcard += `TEL:${phone}\n`;
+            if (email) vcard += `EMAIL:${email}\n`;
+            if (url) vcard += `URL:${url}\n`;
+            if (address) vcard += `ADR:;;${address};;;;\n`;
+            vcard += 'END:VCARD';
+
+            return vcard;
+        }
+
+        function generateWiFiString() {
+            const ssid = document.getElementById('wifi-ssid').value;
+            const password = document.getElementById('wifi-password').value;
+            const security = document.getElementById('wifi-security').value;
+            const hidden = document.getElementById('wifi-hidden').checked;
+
+            if (!ssid) return '';
+
+            let wifiString = `WIFI:S:${ssid};`;
+            if (security !== 'nopass') {
+                wifiString += `T:${security};P:${password};`;
+            }
+            if (hidden) {
+                wifiString += 'H:true;';
+            }
+            wifiString += ';';
+
+            return wifiString;
+        }
+
+        function generateBitcoinString() {
+            const address = document.getElementById('bitcoin-address').value;
+            const amount = document.getElementById('bitcoin-amount').value;
+            const label = document.getElementById('bitcoin-label').value;
+
+            if (!address) return '';
+
+            let bitcoinString = `bitcoin:${address}`;
+            const params = [];
+            
+            if (amount) params.push(`amount=${amount}`);
+            if (label) params.push(`label=${encodeURIComponent(label)}`);
+            
+            if (params.length > 0) {
+                bitcoinString += '?' + params.join('&');
+            }
+
+            return bitcoinString;
+        }
+
+        function generateInstagramString() {
+            const username = document.getElementById('instagram-username').value;
+            if (!username) return '';
+            return `https://instagram.com/${username}`;
+        }
+
+        function generateFacebookString() {
+            const username = document.getElementById('facebook-username').value;
+            if (!username) return '';
+            return `https://facebook.com/${username}`;
+        }
+
+        function generateTwitterString() {
+            const username = document.getElementById('twitter-username').value;
+            if (!username) return '';
+            return `https://twitter.com/${username}`;
+        }
+
+        function generateYouTubeString() {
+            const type = document.getElementById('youtube-type').value;
+            
+            if (type === 'video') {
+                const videoUrl = document.getElementById('youtube-video').value;
+                if (!videoUrl) return '';
+                return videoUrl;
+            } else {
+                const channel = document.getElementById('youtube-channel').value;
+                if (!channel) return '';
+                
+                if (channel.startsWith('@')) {
+                    return `https://youtube.com/${channel}`;
+                } else if (channel.startsWith('/')) {
+                    return `https://youtube.com${channel}`;
+                } else {
+                    return `https://youtube.com/@${channel}`;
+                }
+            }
+        }
+
+        function generateTikTokString() {
+            const username = document.getElementById('tiktok-username').value;
+            if (!username) return '';
+            return `https://tiktok.com/@${username}`;
+        }
+
+        function generateQR() {
+            const data = getActiveTabData();
+            if (!data) {
+                showError('Please enter data to generate QR code');
+                return;
+            }
+
+            const canvas = document.getElementById('qr-canvas');
+            const size = parseInt(document.getElementById('size-slider').value);
+            const fgColor = document.getElementById('fg-color').value;
+            const bgColor = document.getElementById('bg-color').value;
+            const errorLevel = document.getElementById('error-level').value;
+
+            const options = {
+                width: size,
+                height: size,
+                color: {
+                    dark: fgColor,
+                    light: bgColor
+                },
+                errorCorrectionLevel: errorLevel
+            };
+
+            currentQRData = data;
+            currentQROptions = options;
+
+            QRCode.toCanvas(canvas, data, options, function(error) {
+                if (error) {
+                    showError('Error generating QR code: ' + error.message);
+                } else {
+                    hideMessages();
+                }
+            });
+        }
+
+        function downloadQR(format) {
+            if (!currentQRData) {
+                showError('Please generate a QR code first');
+                return;
+            }
+
+            const canvas = document.getElementById('qr-canvas');
+            const filename = `qrcode-${Date.now()}`;
+
+            switch(format) {
+                case 'png':
+                    downloadPNG(canvas, filename);
+                    break;
+                case 'svg':
+                    downloadSVG(filename);
+                    break;
+                case 'pdf':
+                    downloadPDF(canvas, filename);
+                    break;
+            }
+
+            showSuccess(`QR code downloaded as ${format.toUpperCase()}`);
+        }
+
+        function downloadPNG(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function downloadSVG(filename) {
+            QRCode.toString(currentQRData, {
+                ...currentQROptions,
+                type: 'svg'
+            }, function(error, svg) {
+                if (error) {
+                    showError('Error generating SVG: ' + error.message);
+                    return;
+                }
+                
+                const blob = new Blob([svg], { type: 'image/svg+xml' });
+                const link = document.createElement('a');
+                link.download = filename + '.svg';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
+        }
+
+        function downloadPDF(canvas, filename) {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            const imgData = canvas.toDataURL('image/png');
+            
+            const size = currentQROptions.width || 256;
+            const pdfSize = Math.min(size * 0.75, 150); // Convert px to mm and limit size
+            
+            pdf.addImage(imgData, 'PNG', 20, 20, pdfSize, pdfSize);
+            pdf.save(filename + '.pdf');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            const successDiv = document.getElementById('success-message');
+            successDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success-message');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.style.display = 'none';
+
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function hideMessages() {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
