@@ -448,6 +448,60 @@
             display: none;
         }
 
+        /* Statistics Footer Styles */
+        .stats-footer {
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .stats-section {
+            text-align: center;
+        }
+
+        .stats-section h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .main-content {
@@ -518,6 +572,16 @@
                 width: 2px;
                 height: 2px;
             }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -568,6 +632,14 @@
                 height: 18px;
                 font-size: 10px;
                 margin-bottom: 3px;
+            }
+
+            .stats-footer {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.5em;
             }
         }
     </style>
@@ -833,38 +905,37 @@
                 </div>
 
                 <!-- Customization Controls -->
-				<details class="section" id="customization-section">
-					<summary>
-						<h3 style="display:inline">Customization</h3>
-					</summary>
+                <details class="section" id="customization-section">
+                    <summary>
+                        <h3 style="display:inline">Customization</h3>
+                    </summary>
 
-					<!-- original Customization content -->
-					<div class="color-controls">
-						<div class="color-group">
-							<label for="fg-color">Foreground:</label>
-							<input type="color" id="fg-color" value="#000000">
-						</div>
-						<div class="color-group">
-							<label for="bg-color">Background:</label>
-							<input type="color" id="bg-color" value="#ffffff">
-						</div>
-					</div>
+                    <div class="color-controls">
+                        <div class="color-group">
+                            <label for="fg-color">Foreground:</label>
+                            <input type="color" id="fg-color" value="#000000">
+                        </div>
+                        <div class="color-group">
+                            <label for="bg-color">Background:</label>
+                            <input type="color" id="bg-color" value="#ffffff">
+                        </div>
+                    </div>
 
-					<div class="size-control">
-						<label for="size-slider">Size: <span id="size-value">256</span>px</label>
-						<input type="range" id="size-slider" class="size-slider" min="128" max="512" value="256">
-					</div>
+                    <div class="size-control">
+                        <label for="size-slider">Size: <span id="size-value">256</span>px</label>
+                        <input type="range" id="size-slider" class="size-slider" min="128" max="512" value="256">
+                    </div>
 
-					<div class="form-group">
-						<label for="error-level">Error Correction Level</label>
-						<select id="error-level">
-							<option value="L">Low (~7%)</option>
-							<option value="M" selected>Medium (~15%)</option>
-							<option value="Q">Quartile (~25%)</option>
-							<option value="H">High (~30%)</option>
-						</select>
-					</div>
-				</details>
+                    <div class="form-group">
+                        <label for="error-level">Error Correction Level</label>
+                        <select id="error-level">
+                            <option value="L">Low (~7%)</option>
+                            <option value="M" selected>Medium (~15%)</option>
+                            <option value="Q">Quartile (~25%)</option>
+                            <option value="H">High (~30%)</option>
+                        </select>
+                    </div>
+                </details>
             </div>
 
             <div class="preview-panel">
@@ -884,6 +955,39 @@
         </div>
     </div>
 
+    <!-- Enhanced Statistics Footer -->
+    <footer class="stats-footer">
+        <div class="stats-container">
+            <div class="stats-section">
+                <h4>Today's Statistics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="daily-visits">0</div>
+                        <div class="stat-label">Visitors Today</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="daily-generated">0</div>
+                        <div class="stat-label">Generated Today</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-section">
+                <h4>Lifetime Statistics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="lifetime-visits">0</div>
+                        <div class="stat-label">Total Visitors</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="lifetime-generated">0</div>
+                        <div class="stat-label">Total Generated</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script>
         // Global variables
         let currentQRData = '';
@@ -891,6 +995,7 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            initializeStats();
             setupEventListeners();
             generateQR();
         });
@@ -1198,6 +1303,8 @@
                     showError('Error generating QR code: ' + error.message);
                 } else {
                     hideMessages();
+                    // Track QR code generation
+                    incrementGenerated();
                 }
             });
         }
@@ -1289,6 +1396,67 @@
         function hideMessages() {
             document.getElementById('error-message').style.display = 'none';
             document.getElementById('success-message').style.display = 'none';
+        }
+
+        // Enhanced Statistics tracking functionality
+        function initializeStats() {
+            const today = new Date().toDateString();
+            const lastVisitDate = localStorage.getItem('lastVisitDate');
+
+            // Initialize lifetime counters if they don't exist
+            if (!localStorage.getItem('lifetimeVisits')) {
+                localStorage.setItem('lifetimeVisits', '0');
+            }
+            if (!localStorage.getItem('lifetimeGenerated')) {
+                localStorage.setItem('lifetimeGenerated', '0');
+            }
+
+            // Reset daily stats if it's a new day
+            if (lastVisitDate !== today) {
+                localStorage.setItem('dailyVisits', '0');
+                localStorage.setItem('dailyGenerated', '0');
+                localStorage.setItem('lastVisitDate', today);
+            }
+
+            // Increment daily visit count
+            const currentDailyVisits = parseInt(localStorage.getItem('dailyVisits') || '0');
+            const newDailyVisits = currentDailyVisits + 1;
+            localStorage.setItem('dailyVisits', newDailyVisits.toString());
+
+            // Increment lifetime visit count
+            const currentLifetimeVisits = parseInt(localStorage.getItem('lifetimeVisits') || '0');
+            const newLifetimeVisits = currentLifetimeVisits + 1;
+            localStorage.setItem('lifetimeVisits', newLifetimeVisits.toString());
+
+            // Update display
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            const dailyVisits = localStorage.getItem('dailyVisits') || '0';
+            const dailyGenerated = localStorage.getItem('dailyGenerated') || '0';
+            const lifetimeVisits = localStorage.getItem('lifetimeVisits') || '0';
+            const lifetimeGenerated = localStorage.getItem('lifetimeGenerated') || '0';
+
+            document.getElementById('daily-visits').textContent = dailyVisits;
+            document.getElementById('daily-generated').textContent = dailyGenerated;
+            document.getElementById('lifetime-visits').textContent = lifetimeVisits;
+            document.getElementById('lifetime-generated').textContent = lifetimeGenerated;
+        }
+
+        function incrementGenerated() {
+            // Increment daily generated count
+            const currentDaily = parseInt(localStorage.getItem('dailyGenerated') || '0');
+            const newDaily = currentDaily + 1;
+            localStorage.setItem('dailyGenerated', newDaily.toString());
+
+            // Increment lifetime generated count
+            const currentLifetime = parseInt(localStorage.getItem('lifetimeGenerated') || '0');
+            const newLifetime = currentLifetime + 1;
+            localStorage.setItem('lifetimeGenerated', newLifetime.toString());
+
+            // Update display
+            updateStatsDisplay();
         }
     </script>
 </body>
